@@ -1,0 +1,19 @@
+{
+  "name": "codechef-code-downloader",
+  "version": "1.0.0",
+  "description": "download solutions of a user from codechef",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "vibhor agrawal",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^2.3.0",
+    "cheerio": "^1.0.0-rc.2",
+    "co": "^4.6.0",
+    "co-prompt": "^1.0.0",
+    "commander": "^2.12.2",
+    "request": "^2.83.0"
+  }
+}
