@@ -2,7 +2,9 @@ Codechef-Code-Downloader(cocodo) is a CLI tool to download all the accepted solu
 
 ## Installation
 
-```$ npm install codechef-code-downloader -g```
+```console
+$ npm install codechef-code-downloader -g
+```
 
 ## Usage
 
