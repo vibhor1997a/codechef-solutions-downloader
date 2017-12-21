@@ -5,8 +5,6 @@ String.prototype.replaceAll = function (search, replacement) {
 };
 const fs = require('fs');
 const request = require('request');
-const co = require('co');
-const prompt = require('co-prompt');
 const commander = require('commander');
 const chalk = require('chalk');
 const version = require('./package.json').version;
@@ -64,8 +62,10 @@ function update(username) {
                                         fs.writeFile(solutionFile, code, (err) => {
                                             if (!err) {
                                                 console.log(`${solutionFile} written`);
-                                                if (index == solution.length - 1)
+                                                if (index == solution.length - 1){
+                                                    console.log(`All files are saved in ${userDir}`);
                                                     process.exit(0);
+                                                }
                                             }
                                             else {
                                                 console.log(err);
@@ -92,11 +92,11 @@ function update(username) {
 
 /**
  * Returns the filename with extension and solution details
- * @param {Solution} solution
+ * @param {Solution} solution solution whose file name is to be created 
  * @returns {string} filename with extension 
  */
 function getFileName(solution) {
-    let fileBaseName = 'source-' + new Date().getTime();
+    let fileBaseName = 'source';// + new Date().getTime();
     let score = (solution.score) ? '-' + solution.score + 'pts' : '';
     fileBaseName += score;
     let fileExt = '.txt';
@@ -115,5 +115,6 @@ function getFileName(solution) {
     else if (solution.lang.indexOf('NODE') > -1) {
         fileExt = '.js';
     }
+    fileBaseName+=('-'+solution.date.getTime());
     return fileBaseName + fileExt;
 }
