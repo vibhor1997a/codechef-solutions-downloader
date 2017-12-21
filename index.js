@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+String.prototype.replaceAll = function (search, replacement) {
+    var target = this;
+    return target.replace(new RegExp(search, 'g'), replacement);
+};
 const fs = require('fs');
 const request = require('request');
 const co = require('co');
@@ -9,33 +13,110 @@ const version = require('./package.json').version;
 const cheerio = require('cheerio');
 const os = require('os');
 const homedir = os.userInfo().homedir;
-let solutionsDir = homedir + '\\cocodownloader';
+const path = require('path');
+let appDir = path.join(homedir, 'cocodownloader');
 let getSolved = require('./lib/getsolved');
 let getSolutions = require('./lib/getsolutions');
+const Solution = require('./lib/solutionclass');
+const Problem = require('./lib/problemclass');
+let getCode = require('./lib/getCode');
 
 commander.arguments('<username>').version(version).option('-v, --version', "output the version number", () => {
     console.log(version);
 }).action(update).parse(process.argv);
 
+/**
+ * Callback function to be passed in commander action
+ * @param {string} username username
+ * @returns null
+ */
 function update(username) {
-    fs.exists(solutionsDir, (exists) => {
+    fs.exists(appDir, (exists) => {
         if (!exists) {
-            fs.mkdirSync(solutionsDir);
+            fs.mkdirSync(appDir);
         }
-        let userDir = solutionsDir + '\\' + username;
+        let userDir = path.join(appDir, username);
         if (!fs.existsSync(userDir)) {
             fs.mkdirSync(userDir);
         }
         getSolved(username, (err, problems) => {
-            let p = [];
-            problems.forEach((problem) => {
-                p.push(getSolutions(problem));
-            });
-            Promise.all(p).then((solutions) => {
-                solutions = solutions.filter((x) => x.link != '');
-            }, (err) => {
+            if (!err) {
+                problems.forEach((problem) => {
+                    let p = getSolutions(problem);
+                    Promise.resolve(p).then((solutions) => {
+                        let contestDir = path.join(userDir, problem.contest);
+                        if (!fs.existsSync(contestDir)) {
+                            fs.mkdirSync(contestDir);
+                        }
+                        let problemDir = path.join(userDir, problem.contest, problem.name);
+                        if (!fs.existsSync(problemDir)) {
+                            fs.mkdirSync(problemDir);
+                        }
+                        solutions.forEach((solution) => {
+                            if (solution.link) {
+                                let solutionFile = path.join(problemDir, getFileName(solution));
+                                getCode(solution, (err, code) => {
+                                    if (err) {
+                                        console.log(err);
+                                    }
+                                    else {
+                                        fs.writeFile(solutionFile, code, (err) => {
+                                            if (!err) {
+                                                console.log(`${solutionFile} written`);
+                                                // console.log(solution);
+                                            }
+                                            else {
+                                                console.log(err);
+                                                process.exit(1)
+                                            }
+                                        })
+                                    }
+                                })
+                            }
+                        });
+                    }, (err) => {
+                        console.log(err);
+                    });
+                });
+            }
+            else {
                 console.log(err);
-            });
+                process.exit(2);
+            }
         });
     });
+}
+
+/**
+ * Returns the filename with extension and solution details
+ * @param {Solution} solution
+ * @returns {string} filename with extension 
+ */
+function getFileName(solution) {
+    let fileBaseName = '';
+    let date = solution.date;
+    date = date.split(' ');
+    let time = ' ' + date[0] + ' ' + date[1];
+    date = date[2].replaceAll('/', '-');
+    date += time;
+    fileBaseName += date;
+    let score = (solution.score) ? ' ' + solution.score + 'pts' : '';
+    fileBaseName += score;
+    let fileExt = '.txt';
+    if (solution.lang.indexOf('C++') > -1) {
+        fileExt = '.cpp';
+    }
+    else if (solution.lang.indexOf('C') > -1) {
+        fileExt = '.c';
+    }
+    else if (solution.lang.indexOf('JAVA') > -1) {
+        fileExt = '.java';
+    }
+    else if (solution.lang.indexOf('PYTH') > -1) {
+        fileExt = '.py';
+    }
+    else if (solution.lang.indexOf('NODE') > -1) {
+        fileExt = '.js';
+    }
+    return fileBaseName + fileExt;
 }
