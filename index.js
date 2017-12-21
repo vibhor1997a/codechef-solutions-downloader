@@ -14,7 +14,7 @@ const cheerio = require('cheerio');
 const os = require('os');
 const homedir = os.userInfo().homedir;
 const path = require('path');
-let appDir = path.join(homedir, 'cocodownloader');
+let appDir = path.join(homedir, 'cocodo');
 let getSolved = require('./lib/getsolved');
 let getSolutions = require('./lib/getsolutions');
 const Solution = require('./lib/solutionclass');
@@ -39,6 +39,7 @@ function update(username) {
         if (!fs.existsSync(userDir)) {
             fs.mkdirSync(userDir);
         }
+        console.log('Fetching User Details...');
         getSolved(username, (err, problems) => {
             if (!err) {
                 problems.forEach((problem) => {
@@ -52,7 +53,7 @@ function update(username) {
                         if (!fs.existsSync(problemDir)) {
                             fs.mkdirSync(problemDir);
                         }
-                        solutions.forEach((solution) => {
+                        solutions.forEach((solution, index) => {
                             if (solution.link) {
                                 let solutionFile = path.join(problemDir, getFileName(solution));
                                 getCode(solution, (err, code) => {
@@ -63,15 +64,16 @@ function update(username) {
                                         fs.writeFile(solutionFile, code, (err) => {
                                             if (!err) {
                                                 console.log(`${solutionFile} written`);
-                                                // console.log(solution);
+                                                if (index == solution.length - 1)
+                                                    process.exit(0);
                                             }
                                             else {
                                                 console.log(err);
                                                 process.exit(1)
                                             }
-                                        })
+                                        });
                                     }
-                                })
+                                });
                             }
                         });
                     }, (err) => {
@@ -81,6 +83,7 @@ function update(username) {
             }
             else {
                 console.log(err);
+                fs.rmdirSync(userDir);
                 process.exit(2);
             }
         });
@@ -93,14 +96,8 @@ function update(username) {
  * @returns {string} filename with extension 
  */
 function getFileName(solution) {
-    let fileBaseName = '';
-    let date = solution.date;
-    date = date.split(' ');
-    let time = ' ' + date[0] + ' ' + date[1];
-    date = date[2].replaceAll('/', '-');
-    date += time;
-    fileBaseName += date;
-    let score = (solution.score) ? ' ' + solution.score + 'pts' : '';
+    let fileBaseName = 'source-' + new Date().getTime();
+    let score = (solution.score) ? '-' + solution.score + 'pts' : '';
     fileBaseName += score;
     let fileExt = '.txt';
     if (solution.lang.indexOf('C++') > -1) {
