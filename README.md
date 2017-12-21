@@ -8,4 +8,6 @@ $ npm install codechef-code-downloader -g
 
 ## Usage
 
-```$ cococo <username>```
+```console
+$ cocodo <username>
+```
