@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin / env node
 String.prototype.replaceAll = function (search, replacement) {
     var target = this;
     return target.replace(new RegExp(search, 'g'), replacement);
@@ -40,7 +40,7 @@ function update(username) {
         console.log('Fetching User Details...');
         getSolved(username, (err, problems) => {
             if (!err) {
-                problems.forEach((problem) => {
+                problems.forEach((problem, indexp) => {
                     let p = getSolutions(problem);
                     Promise.resolve(p).then((solutions) => {
                         let contestDir = path.join(userDir, problem.contest);
@@ -51,7 +51,7 @@ function update(username) {
                         if (!fs.existsSync(problemDir)) {
                             fs.mkdirSync(problemDir);
                         }
-                        solutions.forEach((solution, index) => {
+                        solutions.forEach((solution, indexs) => {
                             if (solution.link) {
                                 let solutionFile = path.join(problemDir, getFileName(solution));
                                 getCode(solution, (err, code) => {
@@ -62,10 +62,6 @@ function update(username) {
                                         fs.writeFile(solutionFile, code, (err) => {
                                             if (!err) {
                                                 console.log(`${solutionFile} written`);
-                                                if (index == solution.length - 1){
-                                                    console.log(`All files are saved in ${userDir}`);
-                                                    process.exit(0);
-                                                }
                                             }
                                             else {
                                                 console.log(err);
@@ -115,6 +111,6 @@ function getFileName(solution) {
     else if (solution.lang.indexOf('NODE') > -1) {
         fileExt = '.js';
     }
-    fileBaseName+=('-'+solution.date.getTime());
+    fileBaseName += ('-' + solution.date.getTime());
     return fileBaseName + fileExt;
 }
