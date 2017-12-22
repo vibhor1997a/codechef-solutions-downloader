@@ -1,6 +1,6 @@
 {
   "name": "codechef-code-downloader",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "download solutions of a user from codechef",
   "main": "index.js",
   "bin": {
