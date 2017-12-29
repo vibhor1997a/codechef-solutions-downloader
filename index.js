@@ -53,7 +53,7 @@ function update(username) {
                         }
                         solutions.forEach((solution, indexs) => {
                             if (solution.link) {
-                                let solutionFile = path.join(problemDir, getFileName(solution));
+                                let solutionFile = path.join(problemDir, solution.getFileName());
                                 getCode(solution, (err, code) => {
                                     if (err) {
                                         console.log(err);
@@ -84,33 +84,4 @@ function update(username) {
             }
         });
     });
-}
-
-/**
- * Returns the filename with extension and solution details
- * @param {Solution} solution solution whose file name is to be created 
- * @returns {string} filename with extension 
- */
-function getFileName(solution) {
-    let fileBaseName = 'source';// + new Date().getTime();
-    let score = (solution.score) ? '-' + solution.score + 'pts' : '';
-    fileBaseName += score;
-    let fileExt = '.txt';
-    if (solution.lang.indexOf('C++') > -1) {
-        fileExt = '.cpp';
-    }
-    else if (solution.lang.indexOf('C') > -1) {
-        fileExt = '.c';
-    }
-    else if (solution.lang.indexOf('JAVA') > -1) {
-        fileExt = '.java';
-    }
-    else if (solution.lang.indexOf('PYTH') > -1) {
-        fileExt = '.py';
-    }
-    else if (solution.lang.indexOf('NODE') > -1) {
-        fileExt = '.js';
-    }
-    fileBaseName += ('-' + solution.date.getTime());
-    return fileBaseName + fileExt;
 }
